@@ -1,0 +1,4 @@
+>Update lammps code to calculate R_g for only particles 1
+>Update python file for persistence legnth to only particles 1
+>Update python file for dataextraction to reflect the above
+>doublecheck if the batchrun needs any amendments
