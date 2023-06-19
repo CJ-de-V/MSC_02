@@ -35,37 +35,42 @@ int main(int argc, char *argv[]) {
         int N = atoi(argv[2]);  //total number of monomers for chain
         int T = atoi(argv[3]); //total number of monomers for tether
         int NT=N+T;
-        double width =1.0*N;
+        double width = fmax(1.0*N, 1.0*T); //
         double ainc=0.95; //increment size
-        double leftlim = 0.025*width;
         //spacing so that diagonal of cube fills 90% of sphere's length along that line.
         //printf("%d monomers => cube width %d\n", N, n);
-
+	double zpoly =-T*ainc+width/2 ;//z coordinate of polymer
+	double midshift = (width-(N+1)*ainc)/2.0; //shifts things to the middle
+	//printf("AAGh %f %f\n", midshift,);
+	if (N%2==0){ midshift-=0.5*ainc;
+	}
         struct monomer *listomonomers=(struct monomer*)calloc(N+T+1,sizeof(struct monomer));
         //first entry is empty cuz indexing from 1 is more convenient
         for(i=1; i<=N; i++) {
                 listomonomers[i].id = i;
-                listomonomers[i].x=leftlim+ainc*i-width/2.0;
+                listomonomers[i].x=ainc*i-width/2.0 + midshift;
                 listomonomers[i].y=0.0;
-                listomonomers[i].z=0.0;
+                listomonomers[i].z=zpoly;
         }
 
-        int MM=ceil(N/2); //ID of tethering point
-        double xtether=leftlim+ainc*floor(N/2)-width/2.0;
+        int MM=N/2+1; //ID of tethering point
+        //double xtether=ainc*floor(N/2)-width/2.0;
         int id = 0;
+        //using this x coordinate (fixed at 0) does mean that the starting position of the attachment
+        //might not be as orthogonal as we'd like since it's shifted one to the side, just have a look at a N13 T7 one
         for(i=1; i<=T; i++)
         {
           id=i+N; //unshifted ID... why do we not start at 0 again?
           listomonomers[id].id=id;
-          listomonomers[id].x=xtether;
+          listomonomers[id].x=0.0;
           listomonomers[id].y=0.0;
-          listomonomers[id].z=ainc*i;
+          listomonomers[id].z=zpoly+ainc*i;
         }
 
         //write to tha file
         FILE *configuration = fopen(argv[1],"w");
 
-        fprintf(configuration, "#Arrangement of polymers snaking through a cube orientation\n\n");
+        fprintf(configuration, "#Arrangement of polymer tethered to a walln\n");
         fprintf(configuration, "%8d atoms\n",NT );
         fprintf(configuration, "%8d bonds\n",NT-1 );
         fprintf(configuration, "%8d angles\n\n",NT-1 );
