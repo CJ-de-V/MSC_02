@@ -35,11 +35,13 @@ int main(int argc, char *argv[]) {
         int N = atoi(argv[2]);  //total number of monomers for chain
         int T = atoi(argv[3]); //total number of monomers for tether
         int NT=N+T;
-        double width = fmax(1.0*N, 1.0*T); //
+        double width = fmax(1.0*N, 1.0*(T+1)); //
         double ainc=0.95; //increment size
         //spacing so that diagonal of cube fills 90% of sphere's length along that line.
         //printf("%d monomers => cube width %d\n", N, n);
-	double zpoly =-T*ainc+width/2 ;//z coordinate of polymer
+	double zpoly =-T*ainc+width/2 -1.0;//z coordinate of polymer
+	
+	//1.0IS A MAGIC NUMBER, EXTRA SHIFT BECAUSE OF WALL SHENANEGANS 
 	double midshift = (width-(N+1)*ainc)/2.0; //shifts things to the middle
 	//printf("AAGh %f %f\n", midshift,);
 	if (N%2==0){ midshift-=0.5*ainc;
@@ -66,7 +68,9 @@ int main(int argc, char *argv[]) {
           listomonomers[id].y=0.0;
           listomonomers[id].z=zpoly+ainc*i;
         }
-
+	
+	
+	
         //write to tha file
         FILE *configuration = fopen(argv[1],"w");
 
@@ -78,8 +82,8 @@ int main(int argc, char *argv[]) {
         fprintf(configuration, "%8d bond types\n",1 );
         fprintf(configuration, "%8d angle types\n\n",2 );
         fprintf(configuration, "%8lf %8lf xlo xhi\n",-width/2,width/2 );
-        fprintf(configuration, "%8lf %8lf ylo yhi\n",-width/2,width/2 );
-        fprintf(configuration, "%8lf %8lf zlo zhi\n\n",-width/2,width/2 );
+        fprintf(configuration, "%8lf %8lf ylo yhi\n",-width/2,width/2 ); //the 
+        fprintf(configuration, "%8lf %8lf zlo zhi\n\n",-width/2,width/2);
         fprintf(configuration, "Masses\n\n 1 1\n  2 1\n\n");
         fprintf(configuration, "Atoms\n\n");
         //positions of the first N long chain type particles 

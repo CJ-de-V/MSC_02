@@ -9,6 +9,10 @@ boundary m m m
 # Pair interactions require lists of neighbours to be calculated
 ###
 neighbor 1.9 bin
+# amogus used to only really work for 1.9
+# but now it works at 1.6 too... EEENG! wrong worked for these because of the
+# high bending cost meaning pairwise stuff never comes up, the relevance of the pairwise
+# stuff means we have to make the bin size decently large
 neigh_modify every 1 delay 0 check yes
 
 ###
@@ -29,8 +33,8 @@ dump_modify dum1  sort id
 
 ## angles
 angle_style  cosine
-angle_coeff   1  16.0 # the stiffer polymer
-angle_coeff   2  16.0 # the less stiff chain
+angle_coeff   1  0.001 # the stiffer polymer
+angle_coeff   2  0.001 # the less stiff chain
 
 ## Between bonded atoms
 bond_style   harmonic
@@ -66,8 +70,10 @@ group fixonepoint id < ${finalID} # latch tether to wall
 velocity all zero linear   #0 velocity initially
 fix 1 fixonepoint nve                             # NVE integrator
 fix 2 all langevin   1.0 1.0 1.0 ${seed}  # langevin thermostat
-region myplane plane 0.0 0.0 7.601 0.0 0.0 -1.0
-fix wall all wall/region myplane lj126 1.0 1.0 1.12246152962189
+
+variable planez equal "zhi-0.99"
+region myplane plane 0.0 0.0 ${planez} 0.0 0.0 -1.0
+fix bendywall all wall/region myplane lj126 1.0 1.0 1.12246152962189
 
 ##### Output thermodynamic info  (temperature, energy, pressure, etc.) #####
 thermo 10000
@@ -93,9 +99,9 @@ fix myRG2file all print 10000 "$t ${RG2}" file radius_of_gyration_squared.dat sc
 #Incremenet COMM cutoff since they get quite pesky about it and it leads to
 #issues like atoms not communicating properly when stretched
 ###
-comm_style tiled
+# comm_style tiled
 comm_modify cutoff 3.55
-fix megabalancatron all balance 1000 1.1 rcb
+# fix megabalancatron all balance 10000 1.1 rcb
 
 ###
 # set timestep of integrator
