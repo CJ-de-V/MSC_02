@@ -3,7 +3,7 @@
 ###
 units lj          #use dimensionless LJ units
 atom_style angle  #atoms with bonds and Angles
-boundary m m m
+boundary m m m # formerly m m m
 
 ###
 # Pair interactions require lists of neighbours to be calculated
@@ -13,7 +13,7 @@ neighbor 1.9 bin
 # but now it works at 1.6 too... EEENG! wrong worked for these because of the
 # high bending cost meaning pairwise stuff never comes up, the relevance of the pairwise
 # stuff means we have to make the bin size decently large
-neigh_modify every 1 delay 0 check yes
+neigh_modify every 1 delay 1 check yes
 
 ###
 # READ configuration data file
@@ -33,8 +33,8 @@ dump_modify dum1  sort id
 
 ## angles
 angle_style  cosine
-angle_coeff   1  0.001 # the stiffer polymer
-angle_coeff   2  0.001 # the less stiff chain
+angle_coeff   1  4 # the stiffer polymer
+angle_coeff   2  2 # the less stiff chain
 
 ## Between bonded atoms
 bond_style   harmonic
@@ -42,7 +42,7 @@ bond_style   harmonic
 #   * bond type
 #   * K (energy/distance^2)
 #   * R0 (distance)
-bond_coeff   1   90.0   1.1
+bond_coeff   1   90.0   0.946
 
 
 ## Between non-bonded atoms
@@ -50,7 +50,7 @@ pair_style     soft 1.12246152962189
 #  pair_coeff for soft, specify 3:
 #    * atom type interacting with
 #    * atom type
-#    * energy - 0 to allow overlapping pairs
+#    * energy
 #    * cutoff
 pair_coeff 1 1  1.0 1.12246152962189 # polymer polymer pairs
 pair_coeff 1 2  1.0 1.12246152962189 # tether polymer pairs
@@ -63,7 +63,7 @@ pair_coeff 2 2  1.0 1.12246152962189 # tether tether pairs
 
 
 
-variable seed equal 315987     # a seed for the thermostat
+variable seed equal 333697     # a seed for the thermostat
 
 variable finalID equal count(all) # find the ID of the tether latch
 group fixonepoint id < ${finalID} # latch tether to wall
@@ -87,9 +87,13 @@ variable myepair equal epair
 fix mythermofile all print 10000 "$t ${mytemp} ${myepair}" file thermo_output.dat screen no
 ############################################################################
 
+# Definining groups for the tether and the polymer
+group polymer type  1 1
+group tether  type  2 2
+
 ############################################################################
 #### Set up a compute for R_g
-compute myRG2compute all gyration
+compute myRG2compute polymer gyration
 #### and write it to a file
 variable RG2 equal c_myRG2compute
 fix myRG2file all print 10000 "$t ${RG2}" file radius_of_gyration_squared.dat screen no
@@ -99,22 +103,22 @@ fix myRG2file all print 10000 "$t ${RG2}" file radius_of_gyration_squared.dat sc
 #Incremenet COMM cutoff since they get quite pesky about it and it leads to
 #issues like atoms not communicating properly when stretched
 ###
-# comm_style tiled
+comm_style tiled
 comm_modify cutoff 3.55
-# fix megabalancatron all balance 10000 1.1 rcb
+fix megabalancatron all balance 50000 1.25 rcb
 
 ###
 # set timestep of integrator
 ###
 timestep 0.01
 
-#balance 1.1 rcb
+#balance 1.25 rcb
 
 ###
 # run integration for a number of steps to equilibrate with soft potnentials
 ###
 
-run 10000
+# run 100000
 
 ###
 # Now switch to LJ potential and FENE bonds
@@ -146,13 +150,13 @@ pair_coeff      2 2 1.0 1.0 1.12246152962189 #tethertether
 
 
 #brief stint under new potentials to allow it to relax under them
-run 100000
+run 600000
 
 ###
 # now do a longer run with the FENE LJ potentials, relaxed in every possible way, expect to catch a lot of oscillation
 # this also makes the dump we'll actually use for data analysis
 ###
 
-run 1000000
+run 100000
 
 print "All done :)"
