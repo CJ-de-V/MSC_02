@@ -1,0 +1,36 @@
+# sets up computes needed for continuing a run from a restart file
+# dumps and fixes, dumps are already handled in the python file
+
+###
+# Set up fixes - as these are not stored in the restart files
+###
+variable seed equal 913758     # a seed for the thermostat
+fix 1 fixonepoint nve                             # NVE integrator
+fix 2 all langevin   2.0 2.0 1.0 ${seed}  # langevin thermostat, with higher T exploration
+variable planez equal "zhi-0.99"
+region myplane plane 0.0 0.0 ${planez} 0.0 0.0 -1.0
+fix bendywall all wall/region myplane lj126 1.0 1.0 1.12246152962189 # Plane setup
+
+##### Calculate thermodynamics to write ###################################
+variable t equal step
+variable mytemp equal temp
+variable myepair equal epair
+############################################################################
+
+############################################################################
+#### Set up a compute for R_g
+compute myRG2compute all gyration
+#### and write it to a file
+variable RG2 equal c_myRG2compute
+############################################################################
+
+##### Output thermodynamic info  (temperature, energy, pressure, etc.) #####
+thermo 10000
+thermo_style   custom   step  temp  epair  emol pe ke etotal  press  vol
+############################################################################
+
+###
+# modify neighborlist behaviour since this too is not recorded
+###
+neighbor 1.9 bin
+neigh_modify every 1 delay 0 check yes

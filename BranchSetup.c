@@ -25,15 +25,13 @@ struct monomer {
 int i=0,j=0,k=0, l=0, dj=1,  dk=1;
 
 /*arguments:
+ * Filename
  * number of monomers on polymer
  * number of monomers on tether
- * width of box
-
-
  */
 int main(int argc, char *argv[]) {
-        int N = atoi(argv[2]);  //total number of monomers for chain
-        int T = atoi(argv[3]); //total number of monomers for tether
+        int N = atoi(argv[1]);  //total number of monomers for chain
+        int T = atoi(argv[2]); //total number of monomers for tether
         int NT=N+T;
         double width = fmax(1.0*N, 1.0*(T+1)); //
         double ainc=0.95; //increment size
@@ -72,7 +70,7 @@ int main(int argc, char *argv[]) {
 	
 	
         //write to tha file
-        FILE *configuration = fopen(argv[1],"w");
+        FILE *configuration = fopen(argv[3],"w");
 
         fprintf(configuration, "#Arrangement of polymer tethered to a walln\n");
         fprintf(configuration, "%8d atoms\n",NT );
