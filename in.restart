@@ -19,9 +19,15 @@ variable myepair equal epair
 
 ############################################################################
 #### Set up a compute for R_g
-compute myRG2compute all gyration
+compute myRG2compute polymer gyration
 #### and write it to a file
 variable RG2 equal c_myRG2compute
+############################################################################
+
+############################################################################
+#### Set up a compute for center of mass, com, of the polymer
+compute mycomcompute polymer com
+#### and write it to a file in the python via avg/time which turns out to be the only real way to print out global variables
 ############################################################################
 
 ##### Output thermodynamic info  (temperature, energy, pressure, etc.) #####

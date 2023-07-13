@@ -55,6 +55,12 @@ compute myRG2compute polymer gyration
 variable RG2 equal c_myRG2compute
 ############################################################################
 
+############################################################################
+#### Set up a compute for center of mass, com, of the polymer
+compute mycomcompute polymer com
+#### and write it to a file... in the python file of course
+############################################################################
+
 ###
 # Incremenet COMM cutoff since they get quite pesky about it and it leads to
 # issues like atoms not communicating properly when stretched
@@ -74,8 +80,8 @@ timestep 0.01
 # angles
 ###
 angle_style  cosine
-angle_coeff   1  4 # the stiffer polymer
-angle_coeff   2  2 # the less stiff chain
+angle_coeff   1  0.0 # the stiffer polymer
+angle_coeff   2  0.0 # the less stiff chain
 
 
 ## Between bonded atoms

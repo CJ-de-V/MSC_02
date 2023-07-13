@@ -1,6 +1,6 @@
 # Batchrun.py: runs a batch of LAMMPS experiments for the tethered version
 # arguments: NONE
-# requirements: in.setup, in.continue and a.out should be present in the same directory
+# requirements: in.setup, in.continue and a.out should be present in the run directory
 
 import os
 from mpi4py import MPI
@@ -10,10 +10,10 @@ from subprocess import call
 me = MPI.COMM_WORLD.Get_rank()
 nprocs = MPI.COMM_WORLD.Get_size()
 basedir = os.getcwd()
-Np = [8, 16, 32, 64, 128]
-Nt = [8, 16, 32, 64, 128]
-Kp = [0.25,  1, 4, 16]
-Kt = [0.25, 1, 4, 16]
+Np = [8 , 32, 64, 128 , 256]  # [8 ,16, 32, 64, 128] [0.25,  1, 4, 16, 64]
+Nt = [8 , 32, 64,128 , 256]
+Kp = [0.25,  1, 4, 16, 64]
+Kt = [0.25,  1, 4, 16, 64]
 restarting = True
 
 for np in Np:
@@ -49,8 +49,6 @@ for np in Np:
                     lines = open(basedir + '/' + "in.setup", 'r').readlines()
                     for line in lines:
                         lmp.command(line)
-                    setupcommands = ["angle_coeff   1  " + str(kp),
-                                     "angle_coeff   2  " + str(kt)]
                     restartorfresh = restartorfresh + "Fresh"
 
                 rundetails = "print " + "\"" + ">>>>>>>>>>>>>>>>DETAILS OF RUN<<<<<<<<<<<<<<<<" +"\n>>>>>>>>>>>>>>>>" + discriminator +"___"+restartorfresh+ "<<<<<<<<<<<<<<<<\""
@@ -60,8 +58,12 @@ for np in Np:
                                "fix mythermofile all print 10000 \"$t ${mytemp} ${myepair}\" file thermo_output" + discriminator + ".dat screen no",
                                # thermodynamic data outputted to the file appropriately named (sort of)
                                "fix myRG2file all print 10000 \"$t ${RG2}\" file radius_of_gyration" + discriminator + ".dat screen no",
+                               "fix comfix polymer ave/time 1 1 10000 c_mycomcompute[*] file pcom"+discriminator+".dat",
+                               #every 10 000 timesteps spits out COM
                                "dump dum2 all custom 10000 dump" + discriminator + ".dynamics id type x y z",
-                               "dump_modify dum2  sort id"
+                               "dump_modify dum2  sort id",
+                               "angle_coeff   1  " + str(kp),
+                               "angle_coeff   2  " + str(kt)
                                ]
                 lmp.commands_list(primersetup)
 
