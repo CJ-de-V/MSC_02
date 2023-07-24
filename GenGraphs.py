@@ -9,14 +9,14 @@ from itertools import cycle
 # makes a cycle that lets us iterate over which colors to use
 from distinctipy import distinctipy
 
-colors = distinctipy.get_colors(10)
-print(colors)
+colors = distinctipy.get_colors(25)
+# print(colors)
 number = 1
 
 
 # Pandas dataframe, x dependent & y independent variable, variable on legend and number of figure for plotting
 # figure numbers have to be distinct
-def loglogplot(datfram, Xdata, Ydata, legend, xerror=0, yerror=0):
+def loglogplot(datfram, Xdata, Ydata, legend, legend2=0 ,xerror=0, yerror=0):
     global number
     plt.figure(number)
     number += 1
@@ -27,7 +27,7 @@ def loglogplot(datfram, Xdata, Ydata, legend, xerror=0, yerror=0):
         ndata = df.loc[df[legend] == legset[i]]
         x = np.array(ndata[Xdata].tolist())
         y = np.array(ndata[Ydata].tolist())
-        plt.loglog(x, y, 'o-', base=2, c=colors[i])
+        plt.loglog(x, y, '.', base=2, c=colors[i]) # . formerly o-
 
         if xerror != 0:
             plt.errorbar(x, y, xerr=np.array(ndata[xerror].tolist()), c=colors[i])
@@ -50,22 +50,20 @@ def save_multi_image(filename):
 
 
 df = pd.read_csv('finaldata.csv')
+# Np	Nt	Kp	Kt	lp	Rg	zd	lb	sd_lp	sd_Rg	sd_zd
+# data columns for faster copypasting
 
-# plot ln Lp vs ln k
-# print(df)
-loglogplot(df, 'Kp', 'lp', 'Np', yerror='sd_lp')
-# plot ln N vs ln Rg^2
+loglogplot(df, 'Rg', 'lp', 'Kp')
 
-loglogplot(df, 'Np', 'Rg', 'Kp', yerror='sd_Rg')
+loglogplot(df, 'Rg', 'lp', 'Np')
 
-# plot ln R_g vs ln lp
+loglogplot(df, 'zd', 'Nt', 'Kt')
 
-#loglogplot(df, 'R_g', 'lp', 'k', xerror='R_g_sd', yerror='lp_sd')
+loglogplot(df, 'zd', 'Np', 'Nt')
 
-# plot ln R_g vs ln lp
+loglogplot(df, 'lp', 'zd', 'Kp',)
 
-#loglogplot(df, 'R_g', 'lp', 'N', xerror='lp_sd', yerror='R_g_sd')
 
-# save_multi_image("FinalGraphs/Results.pdf")
+save_multi_image("Results.pdf")
 
 plt.show()
