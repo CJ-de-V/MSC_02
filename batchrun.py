@@ -59,7 +59,7 @@ for np in Np:
                                # thermodynamic data outputted to the file appropriately named (sort of)
                                "fix myRG2file all print 10000 \"$t ${RG2}\" file radius_of_gyration" + discriminator + ".dat screen no",
                                "fix comfix polymer ave/time 1 1 10000 c_mycomcompute[*] file pcom"+discriminator+".dat",
-                               #every 10 000 timesteps spits out COM
+                               #every 10 000 timesteps spits out COM of polymer
                                "dump dum2 all custom 10000 dump" + discriminator + ".dynamics id type x y z",
                                "dump_modify dum2  sort id",
                                "angle_coeff   1  " + str(kp),
